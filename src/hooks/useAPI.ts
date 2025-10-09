@@ -1,0 +1,48 @@
+import {type ComputedRef, type Ref, ref, watch} from "vue";
+
+type ResponseType<T> = {
+    data: T[];
+    meta?: {
+        total: number;
+    }
+}
+
+type QueryType = Ref<Record<string, string>> | ComputedRef<Record<string, string>>;
+
+function makeQueryString(query: QueryType) {
+    const base = `?key=${import.meta.env.VITE_API_KEY}`;
+    return base + Object.keys(query.value).reduce((str, key) => {
+        return str + `&${key}=${query.value[key]}`;
+    }, "");
+}
+
+function useAPI<T extends {}>(endpoint: string, query: QueryType) {
+    const data = ref<ResponseType<T>>({data: []});
+    const error = ref<{} | unknown>({});
+    const loading = ref(false);
+
+    watch(query, async () => {
+        loading.value = true;
+
+        const queryString = makeQueryString(query);
+
+        try {
+            const response = await fetch(`http://${import.meta.env.VITE_API_HOST}/api/${endpoint}${queryString}`);
+            if (response.ok) {
+                data.value = await response.json();
+            } else {
+                error.value = await response.json();
+            }
+        } catch (e: unknown) {
+            console.error(e);
+            error.value = e;
+        }
+
+
+        loading.value = false;
+    }, {immediate: true});
+
+    return {data, error, loading};
+}
+
+export default useAPI;
