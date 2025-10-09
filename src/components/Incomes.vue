@@ -1,11 +1,11 @@
 <template>
   <ProgressSpinner v-if="loading"></ProgressSpinner>
   <div v-else-if="data.data.length">
-    <FieldChart label-field="date" data-field-title="Quantity" data-field="quantity" :data="data.data"/>
-    <DataTable v-model:filters="filters" :value="data.data" scrollable scrollHeight="flex"
+    <FieldChart label-field="date" data-field-title="Quantity" data-field="quantity" :data="filteredData"/>
+    <DataTable v-model:filters="filters" :value="filteredData" scrollable scrollHeight="flex"
                @page="onPage" :first="(page - 1) * rows" :rows="rows"
                paginator lazy :rowsPerPageOptions="[10, 25, 50, 100, 500]" :totalRecords="data.meta?.total"
-               filterDisplay="row" dataKey="nm_id" :loading="loading"
+               filterDisplay="row" dataKey="unique_id" :loading="loading"
                :globalFilterFields="['warehouse_name']">
       <template #header>
         <div class="flex justify-between">
@@ -58,6 +58,7 @@
               :options="warehouseOptions"
               optionLabel="label"
               optionValue="value"
+              data-key="key"
               :show-toggle-all="false"
               placeholder="Select warehouses"
               :maxSelectedLabels="1"
@@ -106,12 +107,12 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import useAPI from "../hooks/useAPI.ts";
 import {type Income} from "../types.ts";
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
 import FieldChart from "./FieldChart.vue";
 import InputText from 'primevue/inputtext';
 
 const filters = ref({
-  warehouse_name: {value: []},
+  warehouse_name: {value: [] as string[]},
   date: {value: [new Date(0), new Date()]},
   barcode: {value: ""},
   supplier_article: {value: ""},
@@ -119,22 +120,61 @@ const filters = ref({
 const page = ref(1);
 const rows = ref(50);
 
-const query = computed(() => {
-  return {
-    dateFrom: "1970-01-01",
-    dateTo: new Date().toISOString().split("T")[0]!,
-    page: page.value.toString(),
-    limit: rows.value.toString()
-  }
+const query = ref({
+  dateFrom: "",
+  dateTo: "",
+  page: "1",
+  limit: "50",
 });
+
+watch([page, rows, () => filters.value.date.value], ([p, r, date]) => {
+  const [dateFrom, dateTo] = date;
+  function makeDateStr(date: Date) {
+    return date.toISOString().split("T")[0]!;
+  }
+
+  query.value = {
+    dateFrom: makeDateStr(dateFrom || new Date(0)),
+    dateTo: makeDateStr(dateTo || new Date()),
+    page: p.toString(),
+    limit: r.toString(),
+  };
+}, {immediate: true});
 
 const {data, error, loading} = useAPI<Income>("incomes", query);
 
-const warehouseOptions = computed(() =>
-    [...new Set(data.value.data.map((item: Income) => item.warehouse_name))]
-        .filter(name => name)
-        .map(name => ({label: name, value: name}))
-);
+const normalizedData = computed(() => {
+  return data.value.data.map(item => ({
+    ...item,
+    unique_id: `${item.nm_id}-${item.income_id}`
+  }));
+});
+
+const filteredData = computed(() => {
+  return normalizedData.value.filter((item) => {
+    const barcodeMatch = !filters.value.barcode.value ||
+        item.barcode.toString().toLowerCase().trim().includes(filters.value.barcode.value.toLowerCase());
+
+    const articleMatch = !filters.value.supplier_article.value ||
+        item.supplier_article.toLowerCase().trim().includes(filters.value.supplier_article.value.toLowerCase());
+
+    const warehouseMatch = filters.value.warehouse_name.value.length === 0 ||
+        filters.value.warehouse_name.value.includes(item.warehouse_name);
+
+    return barcodeMatch && articleMatch && warehouseMatch;
+  });
+});
+
+const warehouseOptions = computed(() => {
+  const unique = [...new Set(data.value.data.map((item: Income) => item.warehouse_name))];
+  return unique
+      .filter(name => name)
+      .map((name, index) => ({
+        label: name,
+        value: name,
+        key: `${name}-${index}`
+      }));
+});
 
 
 function clearFilter() {
