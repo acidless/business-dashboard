@@ -88,16 +88,14 @@
 <script setup lang="ts">
 import Message from 'primevue/message';
 import MultiSelect from 'primevue/multiselect';
-import DatePicker from 'primevue/datepicker'
 import Button from 'primevue/button';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
 import {computed, ref} from "vue";
-import {type Income, type Sale, type Stock} from "../types.ts";
+import {type Stock} from "../types.ts";
 import Dashboard from "./Dashboard.vue";
 import FieldChart from "./FieldChart.vue";
 import {useFilters} from "../hooks/useFilters.ts";
-import Tag from "primevue/tag";
 import useWarehouseOptions from "../hooks/useWarehouseOptions.ts";
 
 const baseData = ref<Stock[]>([]);
@@ -110,7 +108,7 @@ const {filters, filtersApplied, clearFilter, filterData, onFiltersChange, proces
     },
     warehouse_name: {
       value: [],
-      filter: (item: Sale, filterVal: string[]) => {
+      filter: (item: Stock, filterVal: string[]) => {
         return filterVal.length === 0 || filterVal.includes(item.warehouse_name);
       }
     },
@@ -145,10 +143,10 @@ const chartData = computed(() => {
 });
 
 
-function onDataChange(data: Income[]) {
+function onDataChange(data: Stock[]) {
   baseData.value = data.map((item) => ({
     ...item,
-    unique_id: `${item.g_number}-${item.barcode}`
+    unique_id: JSON.stringify(item)
   }));
 
   filterData();

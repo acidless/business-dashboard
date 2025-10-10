@@ -6,7 +6,7 @@ type FiltersType<T> = {
 
 type UseFiltersOptions<T> = {
     initialFilters: FiltersType<T>;
-    data: Ref<T>;
+    data: Ref<T[]>;
 }
 
 export function useFilters<T>(options: UseFiltersOptions<T>) {
@@ -32,7 +32,7 @@ export function useFilters<T>(options: UseFiltersOptions<T>) {
 
     function filterData() {
         processedData.value = data.value.filter((item) => {
-            return Object.entries(filters.value).every(([key, filter]: [string, any]) => {
+            return Object.entries(filters.value).every(([_, filter]: [string, any]) => {
                 return filter.filter(item, filter.value);
             });
         });
@@ -45,8 +45,8 @@ export function useFilters<T>(options: UseFiltersOptions<T>) {
 
     function clearFilter() {
         Object.keys(filters.value).forEach((key) => {
-            const initialValue = initialFilters[key as keyof typeof initialFilters].value;
-            filters.value[key as keyof typeof filters.value].value = initialValue;
+            const initialValue = initialFilters[key as keyof typeof initialFilters]!.value;
+            filters.value[key as keyof typeof filters.value]!.value = initialValue;
         });
         filterData();
     }

@@ -132,7 +132,7 @@ const {filters, filtersApplied, clearFilter, filterData, onFiltersChange, proces
       value: "",
       filter: (item: Income, filterVal: string) => {
         return !filterVal ||
-            item.barcode.toLowerCase().trim().includes(filterVal.toLowerCase());
+            item.barcode.toString().toLowerCase().trim().includes(filterVal.toLowerCase());
       }
     },
     supplier_article: {

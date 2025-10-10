@@ -138,7 +138,7 @@ const {filters, filtersApplied, clearFilter, filterData, onFiltersChange, proces
       value: "",
       filter: (item: Order, filterVal: string) => {
         return !filterVal ||
-            item.barcode.toLowerCase().trim().includes(filterVal.toLowerCase());
+            item.barcode.toString().toLowerCase().trim().includes(filterVal.toLowerCase());
       }
     },
     brand: {
@@ -157,7 +157,7 @@ const {filters, filtersApplied, clearFilter, filterData, onFiltersChange, proces
     },
     is_cancel: {
       value: null as boolean | null,
-      filter: (item: Order, filterVal: string) => {
+      filter: (item: Order, filterVal: boolean) => {
         return filterVal === null || item.is_cancel === filterVal;
       }
     },
