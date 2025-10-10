@@ -111,79 +111,66 @@
 import Dropdown from 'primevue/dropdown';
 import Tag from 'primevue/tag';
 import Message from 'primevue/message';
-import MultiSelect from 'primevue/multiselect';
 import DatePicker from 'primevue/datepicker'
 import Button from 'primevue/button';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
-import {computed, ref} from "vue";
-import {type Income, type Order} from "../types.ts";
+import {ref} from "vue";
+import {type Order} from "../types.ts";
 import Dashboard from "./Dashboard.vue";
 import FieldChart from "./FieldChart.vue";
+import {useFilters} from "../hooks/useFilters.ts";
 
 const statusOptions = [
   {label: 'OK', value: false},
   {label: 'CANCELED', value: true},
 ];
 
-const filters = ref({
-  date: {value: [new Date(0), new Date()]},
-  barcode: {value: ""},
-  brand: {value: ""},
-  subject: {value: ""},
-  is_cancel: {value: null as boolean | null},
-});
-
-const filtersApplied = computed(() => {
-  const f = filters.value;
-  return (
-      f.barcode.value ||
-      f.brand.value ||
-      f.subject.value ||
-      f.is_cancel.value !== null
-  );
-});
-
 const baseData = ref<Order[]>([]);
-const processedData = ref<Order[]>([]);
+const {filters, filtersApplied, clearFilter, filterData, onFiltersChange, processedData} = useFilters<Order>({
+  initialFilters: {
+    date: {
+      value: [new Date(0), new Date()],
+      filter: () => true,
+      excludeApplied: true
+    },
+    barcode: {
+      value: "",
+      filter: (item: Order, filterVal: string) => {
+        return !filterVal ||
+            item.barcode.toLowerCase().trim().includes(filterVal.toLowerCase());
+      }
+    },
+    brand: {
+      value: "",
+      filter: (item: Order, filterVal: string) => {
+        return !filterVal ||
+            item.brand.toLowerCase().trim().includes(filterVal.toLowerCase());
+      }
+    },
+    subject: {
+      value: "",
+      filter: (item: Order, filterVal: string) => {
+        return !filterVal ||
+            item.subject.toLowerCase().trim().includes(filterVal.toLowerCase());
+      }
+    },
+    is_cancel: {
+      value: null as boolean | null,
+      filter: (item: Order, filterVal: string) => {
+        return filterVal === null || item.is_cancel === filterVal;
+      }
+    },
+  },
+  data: baseData
+});
 
 function onDataChange(data: Order[]) {
   baseData.value = data.map((item) => ({
     ...item,
-    unique_id: `${item.nm_id}-${item.income_id}`
+    unique_id: `${item.g_number}-${item.barcode}`
   }));
 
-  filterData();
-}
-
-function filterData() {
-  processedData.value = baseData.value.filter((item) => {
-    const barcodeMatch = !filters.value.barcode.value ||
-        item.barcode.toString().toLowerCase().trim().includes(filters.value.barcode.value.toLowerCase());
-
-    const brandMatch = !filters.value.brand.value ||
-        item.brand.toLowerCase().trim().includes(filters.value.brand.value.toLowerCase());
-
-    const subjectMatch = !filters.value.subject.value ||
-        item.subject.toLowerCase().trim().includes(filters.value.subject.value.toLowerCase());
-
-    const statusMatch = filters.value.is_cancel.value === null ||
-        item.is_cancel === filters.value.is_cancel.value;
-
-    return barcodeMatch && brandMatch && subjectMatch && statusMatch;
-  });
-}
-
-function clearFilter() {
-  filters.value.date.value = [new Date(0), new Date()];
-  filters.value.barcode.value = "";
-  filters.value.subject.value = "";
-  filters.value.brand.value = "";
-  filters.value.is_cancel.value = null;
-}
-
-function onFiltersChange(newFilters: typeof filters.value) {
-  filters.value = newFilters;
   filterData();
 }
 

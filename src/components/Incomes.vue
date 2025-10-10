@@ -1,7 +1,9 @@
 <template>
-  <Dashboard endpoint="incomes" :processed-data="processedData" @on-data-change="onDataChange" @on-filters-change="onFiltersChange" :filters="filters">
+  <Dashboard endpoint="incomes" :processed-data="processedData" @on-data-change="onDataChange"
+             @on-filters-change="onFiltersChange" :filters="filters">
     <template #chart>
-      <FieldChart v-if="processedData.length" label-field="date" data-field-title="Quantity" data-field="quantity" :data="processedData"/>
+      <FieldChart v-if="processedData.length" label-field="date" data-field-title="Quantity" data-field="quantity"
+                  :data="processedData"/>
     </template>
     <template #table-header>
       <div class="flex justify-between">
@@ -110,25 +112,40 @@ import {computed, ref} from "vue";
 import {type Income} from "../types.ts";
 import Dashboard from "./Dashboard.vue";
 import FieldChart from "./FieldChart.vue";
-
-const filters = ref({
-  warehouse_name: {value: [] as string[]},
-  date: {value: [new Date(0), new Date()]},
-  barcode: {value: ""},
-  supplier_article: {value: ""},
-});
-
-const filtersApplied = computed(() => {
-  const f = filters.value;
-  return (
-      f.barcode.value ||
-      f.supplier_article.value ||
-      f.warehouse_name.value.length > 0
-  );
-});
+import {useFilters} from "../hooks/useFilters.ts";
 
 const baseData = ref<Income[]>([]);
-const processedData = ref<Income[]>([]);
+const {filters, filtersApplied, clearFilter, filterData, onFiltersChange, processedData} = useFilters<Income>({
+  initialFilters: {
+    date: {
+      value: [new Date(0), new Date()],
+      filter: () => true,
+      excludeApplied: true
+    },
+    warehouse_name: {
+      value: [],
+      filter: (item: Income, filterVal: string[]) => {
+        return filterVal.length === 0 || filterVal.includes(item.warehouse_name);
+      }
+    },
+    barcode: {
+      value: "",
+      filter: (item: Income, filterVal: string) => {
+        return !filterVal ||
+            item.barcode.toLowerCase().trim().includes(filterVal.toLowerCase());
+      }
+    },
+    supplier_article: {
+      value: "",
+      filter: (item: Income, filterVal: string) => {
+        return !filterVal ||
+            item.supplier_article.toLowerCase().trim().includes(filterVal.toLowerCase());
+      }
+    },
+  },
+  data: baseData
+});
+
 
 function onDataChange(data: Income[]) {
   baseData.value = data.map((item) => ({
@@ -137,21 +154,6 @@ function onDataChange(data: Income[]) {
   }));
 
   filterData();
-}
-
-function filterData() {
-  processedData.value = baseData.value.filter((item) => {
-    const barcodeMatch = !filters.value.barcode.value ||
-        item.barcode.toString().toLowerCase().trim().includes(filters.value.barcode.value.toLowerCase());
-
-    const articleMatch = !filters.value.supplier_article.value ||
-        item.supplier_article.toLowerCase().trim().includes(filters.value.supplier_article.value.toLowerCase());
-
-    const warehouseMatch = filters.value.warehouse_name.value.length === 0 ||
-        filters.value.warehouse_name.value.includes(item.warehouse_name);
-
-    return barcodeMatch && articleMatch && warehouseMatch;
-  });
 }
 
 const warehouseOptions = computed(() => {
@@ -164,18 +166,5 @@ const warehouseOptions = computed(() => {
         key: `${name}-${index}`
       }));
 });
-
-
-function clearFilter() {
-  filters.value.warehouse_name.value = [];
-  filters.value.date.value = [new Date(0), new Date()];
-  filters.value.barcode.value = "";
-  filters.value.supplier_article.value = "";
-}
-
-function onFiltersChange(newFilters: typeof filters.value) {
-  filters.value = newFilters;
-  filterData();
-}
 
 </script>
