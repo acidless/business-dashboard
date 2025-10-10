@@ -1,6 +1,6 @@
 <template>
   <div class="mt-4">
-    <Chart type="line" :data="chartData" :options="chartOptions" style="height: 300px;" />
+    <Chart :type="type" :data="chartData" :options="chartOptions" style="height: 300px;" />
   </div>
 </template>
 
@@ -12,6 +12,10 @@ const props = defineProps({
   data: {
     type: Array,
     required: true
+  },
+  type: {
+    type: String,
+    default: "line",
   },
   dataField: {
     type: String,
@@ -46,6 +50,7 @@ watchEffect(() => {
         data,
         fill: false,
         borderColor: '#34d399',
+        backgroundColor: '#34d399',
         tension: 0.3
       }
     ]

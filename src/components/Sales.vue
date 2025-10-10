@@ -43,8 +43,7 @@
           />
         </template>
       </Column>
-      <Column field="total_price" header="Total Price" filterField="total_price" :filter="true"
-              :showFilterMenu="false">
+      <Column field="total_price" header="Total Price">
         <template #body="{ data }">
           {{ Math.round(data.total_price * 100) / 100 }}
         </template>
@@ -57,8 +56,7 @@
           <Tag v-else severity="danger" :value="data.discount_percent"></Tag>
         </template>
       </Column>
-      <Column field="for_pay" header="For Pay" filterField="for_pay" :filter="true"
-              :showFilterMenu="false">
+      <Column field="for_pay" header="For Pay">
         <template #body="{ data }">
           {{ Math.round(data.for_pay * 100) / 100 }}
         </template>
@@ -100,16 +98,16 @@ import DatePicker from 'primevue/datepicker'
 import Button from 'primevue/button';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
-import {computed, ref} from "vue";
-import {type Income} from "../types.ts";
+import {ref} from "vue";
+import {type Sale} from "../types.ts";
 import Dashboard from "./Dashboard.vue";
 import FieldChart from "./FieldChart.vue";
 import {useFilters} from "../hooks/useFilters.ts";
 import Tag from "primevue/tag";
 import useWarehouseOptions from "../hooks/useWarehouseOptions.ts";
 
-const baseData = ref<Income[]>([]);
-const {filters, filtersApplied, clearFilter, filterData, onFiltersChange, processedData} = useFilters<Income>({
+const baseData = ref<Sale[]>([]);
+const {filters, filtersApplied, clearFilter, filterData, onFiltersChange, processedData} = useFilters<Sale>({
   initialFilters: {
     date: {
       value: [new Date(0), new Date()],
@@ -118,13 +116,13 @@ const {filters, filtersApplied, clearFilter, filterData, onFiltersChange, proces
     },
     warehouse_name: {
       value: [],
-      filter: (item: Income, filterVal: string[]) => {
+      filter: (item: Sale, filterVal: string[]) => {
         return filterVal.length === 0 || filterVal.includes(item.warehouse_name);
       }
     },
     supplier_article: {
       value: "",
-      filter: (item: Income, filterVal: string) => {
+      filter: (item: Sale, filterVal: string) => {
         return !filterVal ||
             item.supplier_article.toLowerCase().trim().includes(filterVal.toLowerCase());
       }
@@ -134,7 +132,7 @@ const {filters, filtersApplied, clearFilter, filterData, onFiltersChange, proces
 });
 
 
-function onDataChange(data: Income[]) {
+function onDataChange(data: Sale[]) {
   baseData.value = data.map((item) => ({
     ...item,
     unique_id: `${item.g_number}-${item.barcode}`
