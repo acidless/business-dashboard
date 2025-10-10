@@ -1,9 +1,15 @@
 <template>
   <ProgressSpinner v-if="loading"></ProgressSpinner>
-  <div v-else-if="data.data.length">
-    <FieldChart label-field="date" data-field-title="Quantity" data-field="quantity" :data="filteredData"/>
+  <div v-else-if="error" class="flex flex-col items-center justify-center text-center p-6">
+    <Message severity="error" :closable="false">
+      <div class="font-bold text-lg mb-2">Data fetching error</div>
+      <div>{{ 'Can\'t load data from the server.' }}</div>
+    </Message>
+  </div>
+  <div v-else>
+    <FieldChart v-if="filteredData.length" label-field="date" data-field-title="Quantity" data-field="quantity" :data="filteredData"/>
     <DataTable v-model:filters="filters" :value="filteredData" scrollable scrollHeight="flex"
-               @page="onPage" :first="(page - 1) * rows" :rows="rows"
+               @page="onPage" :first="(page - 1) * rows" :rows="rows" class="mt-12"
                paginator lazy :rowsPerPageOptions="[10, 25, 50, 100, 500]" :totalRecords="data.meta?.total"
                filterDisplay="row" dataKey="unique_id" :loading="loading"
                :globalFilterFields="['warehouse_name']">
@@ -11,6 +17,10 @@
         <div class="flex justify-between">
           <Button type="button" icon="pi pi-filter-slash" label="Clear" variant="outlined" @click="clearFilter()"/>
         </div>
+
+        <Message v-if="filtersApplied" severity="info" :closable="false" class="mt-3">
+          Filters are applied only to the current page.
+        </Message>
       </template>
       <Column field="barcode" header="Barcode" filterField="barcode" :filter="true" :showFilterMenu="false"
               style="min-width: 8rem">
@@ -99,6 +109,7 @@
 </template>
 
 <script setup lang="ts">
+import Message from 'primevue/message';
 import MultiSelect from 'primevue/multiselect';
 import DatePicker from 'primevue/datepicker'
 import Button from 'primevue/button';
@@ -116,7 +127,17 @@ const filters = ref({
   date: {value: [new Date(0), new Date()]},
   barcode: {value: ""},
   supplier_article: {value: ""},
-})
+});
+
+const filtersApplied = computed(() => {
+  const f = filters.value;
+  return (
+      f.barcode.value ||
+      f.supplier_article.value ||
+      f.warehouse_name.value.length > 0
+  );
+});
+
 const page = ref(1);
 const rows = ref(50);
 

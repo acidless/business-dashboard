@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-12 mt-4">
+  <div class="mt-4">
     <Chart type="line" :data="chartData" :options="chartOptions" style="height: 300px;" />
   </div>
 </template>

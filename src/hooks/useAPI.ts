@@ -18,7 +18,7 @@ function makeQueryString(query: QueryType) {
 
 function useAPI<T extends {}>(endpoint: string, query: QueryType) {
     const data = ref<ResponseType<T>>({data: []});
-    const error = ref<{} | unknown>({});
+    const error = ref<Record<string, string> | null>(null);
     const loading = ref(false);
 
     watch(query, async () => {
@@ -33,7 +33,7 @@ function useAPI<T extends {}>(endpoint: string, query: QueryType) {
             } else {
                 error.value = await response.json();
             }
-        } catch (e: unknown) {
+        } catch (e: any) {
             console.error(e);
             error.value = e;
         }

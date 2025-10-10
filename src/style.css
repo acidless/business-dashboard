@@ -28,8 +28,6 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  place-items: center;
-  min-width: 320px;
   min-height: 100vh;
 }
 
@@ -62,6 +60,7 @@ button:focus-visible {
 }
 
 #app {
+  height: 100%;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
@@ -70,9 +69,15 @@ button:focus-visible {
 }
 
 main {
-  min-height: 100vh;
+  height: 100%;
 }
 
 .block-bg {
   background-color: var(--p-datatable-header-background);
+}
+
+@media screen and (max-width: 768px) {
+  #app {
+    padding: 0.75rem;
+  }
 }
