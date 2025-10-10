@@ -34,6 +34,10 @@ const props = defineProps({
     type: Object,
     required: true
   },
+  endpoint: {
+    type: String,
+    required: true
+  },
   processedData: {
     type: Array,
     required: true
@@ -67,7 +71,7 @@ watch([page, rows, () => props.filters.date.value], ([p, r, date]) => {
   };
 }, {immediate: true});
 
-const {data, error, loading} = useAPI<Income>("incomes", query);
+const {data, error, loading} = useAPI<Income>(props.endpoint, query);
 
 watch([data], () => {
   emit('onDataChange', data.value.data);

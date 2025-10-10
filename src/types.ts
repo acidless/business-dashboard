@@ -12,3 +12,24 @@ export type Income = {
     total_price: string;
     warehouse_name: string;
 }
+
+export type Order = {
+    g_number: string;
+    date: string;
+    last_change_date: string;
+    supplier_article: string;
+    barcode: number;
+    tech_size: string;
+    total_price: string;
+    discord_percent: number;
+    warehouse_name: string;
+    oblast: string;
+    income_id: number;
+    odid: string;
+    nm_id: number;
+    subject: string;
+    category: string;
+    brand: string;
+    is_cancel: boolean;
+    cancel_dt: null;
+}

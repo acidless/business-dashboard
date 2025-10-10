@@ -1,5 +1,5 @@
 <template>
-  <Dashboard :processed-data="processedData" @on-data-change="onDataChange" @on-filters-change="onFiltersChange" :filters="filters">
+  <Dashboard endpoint="incomes" :processed-data="processedData" @on-data-change="onDataChange" @on-filters-change="onFiltersChange" :filters="filters">
     <template #chart>
       <FieldChart v-if="processedData.length" label-field="date" data-field-title="Quantity" data-field="quantity" :data="processedData"/>
     </template>
