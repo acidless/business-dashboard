@@ -1,27 +1,18 @@
 <template>
-  <ProgressSpinner v-if="loading"></ProgressSpinner>
-  <div v-else-if="error" class="flex flex-col items-center justify-center text-center p-6">
-    <Message severity="error" :closable="false">
-      <div class="font-bold text-lg mb-2">Data fetching error</div>
-      <div>{{ 'Can\'t load data from the server.' }}</div>
-    </Message>
-  </div>
-  <div v-else>
-    <FieldChart v-if="filteredData.length" label-field="date" data-field-title="Quantity" data-field="quantity" :data="filteredData"/>
-    <DataTable v-model:filters="filters" :value="filteredData" scrollable scrollHeight="flex"
-               @page="onPage" :first="(page - 1) * rows" :rows="rows" class="mt-12"
-               paginator lazy :rowsPerPageOptions="[10, 25, 50, 100, 500]" :totalRecords="data.meta?.total"
-               filterDisplay="row" dataKey="unique_id" :loading="loading"
-               :globalFilterFields="['warehouse_name']">
-      <template #header>
-        <div class="flex justify-between">
-          <Button type="button" icon="pi pi-filter-slash" label="Clear" variant="outlined" @click="clearFilter()"/>
-        </div>
+  <Dashboard :processed-data="processedData" @on-data-change="onDataChange" @on-filters-change="onFiltersChange" :filters="filters">
+    <template #chart>
+      <FieldChart v-if="processedData.length" label-field="date" data-field-title="Quantity" data-field="quantity" :data="processedData"/>
+    </template>
+    <template #table-header>
+      <div class="flex justify-between">
+        <Button type="button" icon="pi pi-filter-slash" label="Clear" variant="outlined" @click="clearFilter()"/>
+      </div>
 
-        <Message v-if="filtersApplied" severity="info" :closable="false" class="mt-3">
-          Filters are applied only to the current page.
-        </Message>
-      </template>
+      <Message v-if="filtersApplied" severity="info" :closable="false" class="mt-3">
+        Filters are applied only to the current page.
+      </Message>
+    </template>
+    <template #table-body>
       <Column field="barcode" header="Barcode" filterField="barcode" :filter="true" :showFilterMenu="false"
               style="min-width: 8rem">
         <template #body="{ data }">
@@ -104,8 +95,8 @@
           <span>{{ data.quantity }}</span>
         </template>
       </Column>
-    </DataTable>
-  </div>
+    </template>
+  </Dashboard>
 </template>
 
 <script setup lang="ts">
@@ -113,14 +104,12 @@ import Message from 'primevue/message';
 import MultiSelect from 'primevue/multiselect';
 import DatePicker from 'primevue/datepicker'
 import Button from 'primevue/button';
-import ProgressSpinner from 'primevue/progressspinner';
-import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import useAPI from "../hooks/useAPI.ts";
-import {type Income} from "../types.ts";
-import {computed, ref, watch} from "vue";
-import FieldChart from "./FieldChart.vue";
 import InputText from 'primevue/inputtext';
+import {computed, ref} from "vue";
+import {type Income} from "../types.ts";
+import Dashboard from "./Dashboard.vue";
+import FieldChart from "./FieldChart.vue";
 
 const filters = ref({
   warehouse_name: {value: [] as string[]},
@@ -138,41 +127,20 @@ const filtersApplied = computed(() => {
   );
 });
 
-const page = ref(1);
-const rows = ref(50);
+const baseData = ref<Income[]>([]);
+const processedData = ref<Income[]>([]);
 
-const query = ref({
-  dateFrom: "",
-  dateTo: "",
-  page: "1",
-  limit: "50",
-});
-
-watch([page, rows, () => filters.value.date.value], ([p, r, date]) => {
-  const [dateFrom, dateTo] = date;
-  function makeDateStr(date: Date) {
-    return date.toISOString().split("T")[0]!;
-  }
-
-  query.value = {
-    dateFrom: makeDateStr(dateFrom || new Date(0)),
-    dateTo: makeDateStr(dateTo || new Date()),
-    page: p.toString(),
-    limit: r.toString(),
-  };
-}, {immediate: true});
-
-const {data, error, loading} = useAPI<Income>("incomes", query);
-
-const normalizedData = computed(() => {
-  return data.value.data.map(item => ({
+function onDataChange(data: Income[]) {
+  baseData.value = data.map((item) => ({
     ...item,
     unique_id: `${item.nm_id}-${item.income_id}`
   }));
-});
 
-const filteredData = computed(() => {
-  return normalizedData.value.filter((item) => {
+  filterData();
+}
+
+function filterData() {
+  processedData.value = baseData.value.filter((item) => {
     const barcodeMatch = !filters.value.barcode.value ||
         item.barcode.toString().toLowerCase().trim().includes(filters.value.barcode.value.toLowerCase());
 
@@ -184,10 +152,10 @@ const filteredData = computed(() => {
 
     return barcodeMatch && articleMatch && warehouseMatch;
   });
-});
+}
 
 const warehouseOptions = computed(() => {
-  const unique = [...new Set(data.value.data.map((item: Income) => item.warehouse_name))];
+  const unique = [...new Set(baseData.value.map((item: Income) => item.warehouse_name))];
   return unique
       .filter(name => name)
       .map((name, index) => ({
@@ -205,9 +173,9 @@ function clearFilter() {
   filters.value.supplier_article.value = "";
 }
 
-function onPage(event: any) {
-  page.value = event.page + 1;
-  rows.value = event.rows
+function onFiltersChange(newFilters: typeof filters.value) {
+  filters.value = newFilters;
+  filterData();
 }
 
 </script>
