@@ -27,7 +27,7 @@ function useAPI<T extends {}>(endpoint: string, query: QueryType) {
         const queryString = makeQueryString(query);
 
         try {
-            const response = await fetch(`/api/${endpoint}${queryString}`);
+            const response = await fetch(`/api/proxy/${endpoint}${queryString}`);
             if (response.ok) {
                 data.value = await response.json();
             } else {
