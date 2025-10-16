@@ -1,60 +1,55 @@
 # 📊 Business Analytics Dashboard
 
-SPA-приложение для визуализации данных по API: **incomes**, **orders**, **sales** и **stocks**.  
-Проект выполнен на **Vue 3 + Composition API** с использованием UI библиотеки **PrimeVue**.
+SPA for visualizing data via API: **incomes**, **orders**, **sales**, and **stocks**.
+The project was developed using **Vue 3 + Composition API** with the **PrimeVue** UI library.
 
-## 🚀 Возможности
+## 🚀 Features
 
-- 4 страницы, соответствующие API-эндпоинтам:
-  - **/incomes** — поступления
-  - **/orders** — заказы
-  - **/sales** — продажи
-  - **/stocks** — склады
-- На каждой странице:
-  - 📈 график по одному из ключевых полей;
-  - 🧾 таблица с данными;
-  - 🔍 клиентские фильтры по полям;
-  - 📄 серверная пагинация (`limit`, `offset`);
+- 4 pages corresponding to API endpoints:
+  - **/incomes** — income
+  - **/orders** — orders
+  - **/sales** — sales
+  - **/stocks** — warehouses
+- On each page:
+  - 📈 chart for one of the key fields;
+  - 🧾 table with data;
+  - 🔍 client filters by fields;
+  - 📄 server pagination (`limit`, `offset`);
  
 ![Vue](https://img.shields.io/badge/-Vue.js-35495E?logo=vuedotjs&logoColor=4FC08D&style=for-the-badge)
 ![TypeScript](https://shields.io/badge/TypeScript-3178C6?logo=TypeScript&logoColor=FFF&style=for-the-badge)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=Vite&logoColor=white)
 
-## 📷 Демонстрация
+## 📷 Demo
 
-![Пример интерфейса](./assets/screenshot.png)
+![UI](./assets/screenshot.png)
 
-Попробовать проект онлайн:  
-[![Открыть демо](https://img.shields.io/badge/Live%20Demo-Click%20Here-blue?style=for-the-badge)](https://business-dashboard-one-eta.vercel.app)
+Try dashboard online:  
+[![Open demo](https://img.shields.io/badge/Live%20Demo-Click%20Here-blue?style=for-the-badge)](https://business-dashboard-one-eta.vercel.app)
 
 ## 🛠️ Технологии
 
-| Категория | Использовано |
+| Category | Used |
 |------------|---------------|
-| Фреймворк | [Vue 3](https://vuejs.org/) с [Composition API](https://vuejs.org/api/composition-api-setup.html) |
-| UI-компоненты | [PrimeVue](https://primevue.org/) |
-| Графики | [Chart.js](https://www.chartjs.org/) через PrimeVue Chart |
-| Сборщик | [Vite](https://vitejs.dev/) |
-| Типизация | [TypeScript](https://www.typescriptlang.org/) |
-| Развёртывание | [Vercel](https://vercel.com/) |
-| Форматирование кода | ESLint + Prettier |
+| Framework | [Vue 3](https://vuejs.org/) с [Composition API](https://vuejs.org/api/composition-api-setup.html) |
+| UI-components | [PrimeVue](https://primevue.org/) |
+| Charts | [Chart.js](https://www.chartjs.org/) with PrimeVue Chart |
+| Bundler | [Vite](https://vitejs.dev/) |
+| Types | [TypeScript](https://www.typescriptlang.org/) |
+| Deployment | [Vercel](https://vercel.com/) |
+| Code formatting | ESLint + Prettier |
 
 ---
 
-## ⚙️ Установка и запуск
+## ⚙️ Install
 
 ```bash
-# 1️⃣ Клонировать репозиторий
 git clone https://github.com/acidless/business-dashboard.git
 cd business-dashboard
-
-# 2️⃣ Установить зависимости
 npm install
-
-# 3️⃣ Запустить в режиме разработки
 npm run dev
 
-# 4️⃣ Собрать продакшн-сборку
+# Make production build
 npm run build
 ```
 
